@@ -7,16 +7,16 @@ def toMatrix(polynom):
 	for i, elem in enumerate(polynom):
 		regexObj = re.match('((\-?\d*(\.\d+)?(\^\d+)?\*?)*\-?\d*(x|X)|(\-?\d+(\.\d+)?(\^\d+)?(\/?\-?\d+)?\*)*\-?\d+)\^?\d*', elem)
 		if (regexObj and len(regexObj.group(0)) == len(elem)):
-			power = tools.get_polynom_power(elem)
+			power = get_polynom_power(elem)
 			if (power + 1 > len(matrix)):
-								
-			matrix[power] += tools.parse_int(elem)
+				matrix += [0] * (power + 1 - len(matrix))
+			matrix[power] += parse_int(elem)
 		else:
 			print('\033[1m\033[31mWarning! Incorrect polynom member (ignored): \'', elem, '\'\033[0m', sep='')
 
 	return matrix
 
-def parser(polynom_str, flag):
+def parser(polynom_str):
 	matrix = []
 	matrix2 = []
 	polynom1 = []
@@ -33,8 +33,8 @@ def parser(polynom_str, flag):
 	else:
 		print('\033[1m\033[31mWarning: no equal sign (ignored). Value by default: = 0\033[0m')
 
-	polynom1 = tools.transform(polynom1)
-	polynom2 = tools.transform(polynom2)
+	polynom1 = transform(polynom1)
+	polynom2 = transform(polynom2)
 
 	matrix = toMatrix(polynom1)
 	matrix2 = toMatrix(polynom2)
@@ -42,9 +42,11 @@ def parser(polynom_str, flag):
 	if (matrix == None or matrix2 == None):
 		return None
 
-	matrix[0] -= matrix2[0]
-	matrix[1] -= matrix2[1]
-	matrix[2] -= matrix2[2]
+	if (len(matrix2) > len(matrix)):
+		matrix += [0] * (len(matrix2) - len(matrix))
+
+	for i, elem in enumerate(matrix2):
+		matrix[i] -= matrix2[i]
 
 	return matrix
 
