@@ -2,11 +2,20 @@
 
 import sys
 import re
-import polynoms
+import Var
+import parser
+
+VARS = {}
 
 if __name__ == "__main__":
-	matrix = []
+	end = False
+	arg = str()
 
-	for arg in sys.stdin:
-		matrix = polynoms.parser(arg)
-		print(matrix)
+	while not end:
+		expr = re.compile('\-?\d+')
+		print('> ', end='')
+		try:
+			arg = input()
+		except BaseException:
+			print('\nBye, bye!')
+			exit()
