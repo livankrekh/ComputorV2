@@ -9,35 +9,61 @@ class Var:
 		self.type = -1
 		self.x = None
 
-	def createFunc(eq, arg, ALL):
+	def createFunc(self, eq, arg, ALL):
 		self.type = 1
 		self.x = arg
 
-		self.val = self.transform(eq, ALL, arg)
+		self.val = self.transform(eq, ALL)
+		print('TRANSFORM --->', self.val)
 		self.polish = parser.infixToPostfix(self.val).split()
+		print('Postfix --->', self.polish)
 
-	def createVal(eq, ALL):
+	def createVal(self, eq, ALL):
 		self.type = 0
 
-		self.polish = parser.infixToPostfix(self.transform(eq, ALL))
+		self.polish = parser.infixToPostfix(self.transform(eq, ALL)).split()
 		self.val = parser.resolveInfix(self.polish)
 
-	def isVal():
+	def resolve(self, arg=None):
+		if (self.isVal()):
+			return self.val
+		if (self.isFunc()):
+			copy = self.polish.copy if (self.polish is list) else []
+
+			if (arg == None or type(arg) is not (float or int)):
+				return None
+
+			for i, elem in enumerate(copy):
+				if (elem == self.x):
+					copy[i] = str(arg)
+
+			return parser.resolveInfix(copy)
+
+
+	def show(self):
+		if (self.isVal()):
+			return print(str(self.val))
+
+		if (self.isFunc()):
+			return print(self.val)
+
+	def isVal(self):
 		return self.type == 0
 
-	def isFunc():
+	def isFunc(self):
 		return self.type == 1
 
-	def isMatrix():
+	def isMatrix(self):
 		return self.type == 2
 
-	def isScalar():
+	def isScalar(self):
 		return self.type == 3
 
-	@staticmethod
-	def transform(expr, ALL, arg=''):
-		regex = re.compile('(\-?\d*(\.\d+)?)?\w+(\(...\))?')
-		var_regex = re.compile('\w+')
+	def transform(self, expr, ALL):
+		regex = re.compile('([\-\d]\d*[^\d\W]+|\-?\d+\.\d+[^\d\W]+)')
+		regex_koff = re.compile('\-?\d*(\.\d+)?')
+		regex_arg = re.compile('(\-?\d*(\.\d+)?)?' + re.escape(self.x)) if (self.x != None) else ''
+		var_regex = re.compile('[^\d\W]+')
 		expr = expr.replace(' ', '')
 		expr = expr.replace('(', ' ( ').replace(')', ' ) ').replace('^', ' ^ ')
 		expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
@@ -46,12 +72,23 @@ class Var:
 
 		varies = regex.findall(expr)
 
+		print(varies)
+
 		for var in varies:
 			var_str = var_regex.match(var).group(0)
+			res = None
 
-			if (var_str not in ALL and var_str != arg):
+			if (var_str not in ALL and not (regex_arg.match(var) and len(regex_arg.match(var)) != len(var))):
 				print('Warning: Undefined variable \'', var_str, '\'. Ignored!', sep='')
-			elif (var_regex.match(var).group(0) != arg):
-				print('Var:' ALL[var_str])
+			elif (regex_arg.match(var) and len(regex_arg.match(var).group(0)) != len(var)):
+				koff = '-1' if regex_koff.match(var).group(0) == '-' else regex_koff.match(var).group(0)
+				expr = expr.replace(var, koff + ' * ( ' + self.x + ' ) ' if (koff != '') else self.x)
+			else:
+				if (ALL[var_str].isVal()):
+					res = ALL[var_str].resolve()
+					koff = '-1' if regex_koff.match(var).group(0) == '-' else regex_koff.match(var).group(0)
+					expr = expr.replace(var, koff + ' * ( ' + str(res) + ' ) ' if (koff != '') else str(res))
+				else:
+					print('Error: Can\'t include variable', var_str)
 
 		return expr

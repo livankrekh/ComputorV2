@@ -20,7 +20,7 @@ class Stack:
         return len(self.items)
 
 def infixToPostfix(infixexpr):
-    regex = re.compile('\-?(\d+(\.\d+)?)?\w+|\-?\d+(\.\d+)?')
+    regex = re.compile('\-?(\d+(\.\d+)?)?[^\d\W]+|\-?\d+(\.\d+)?')
     prec = {}
     prec["^"] = 4
     prec["*"] = 3
@@ -54,7 +54,7 @@ def infixToPostfix(infixexpr):
     return " ".join(postfixList)
 
 def resolveInfix(exprArr):
-    regexI = re.compile('\-?\d+(\.\d+)?i?')
+    regexI = re.compile('\-?\d+(\.\d+)?i')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
 
@@ -62,7 +62,7 @@ def resolveInfix(exprArr):
         return None
 
     for elem in exprArr:
-        if (len(stack) > 2 and elem in ['/', '*', '+', '-', '%', '^']):
+        if (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
             if (elem == '/'):
                 stack[-2] = stack[-2] / stack[-1]
             elif (elem == '*'):
@@ -75,7 +75,8 @@ def resolveInfix(exprArr):
                 stack[-2] = stack[-2] % stack[-1]
             elif (elem == '^'):
                 stack[-2] = stack[-2] ** stack[-1]
-        else:    
+            stack.pop()
+        else:
             if (regex.match(elem)):
                 if (regexI.match(elem)):
                     stack.append(complex(0, float(regex.match(elem).group(0))))
