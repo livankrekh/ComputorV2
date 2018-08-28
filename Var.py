@@ -11,7 +11,9 @@ class Var:
 
 	def createFunc(self, eq, arg, ALL):
 		self.type = 1
-		self.x = arg
+		self.x = arg.lower()
+
+		print('ARG -------> ', self.x)
 
 		self.val = self.transform(eq, ALL)
 		print('TRANSFORM --->', self.val)
@@ -22,26 +24,36 @@ class Var:
 		self.type = 0
 
 		self.polish = parser.infixToPostfix(self.transform(eq, ALL)).split()
-		self.val = parser.resolveInfix(self.polish)
+		
+		if (self.isVal()):
+			self.val = parser.resolveInfix(self.polish)
+
 
 	def resolve(self, arg=None):
 		if (self.isVal()):
 			return self.val
 		if (self.isFunc()):
-			copy = self.polish.copy if (self.polish is list) else []
+			copy = self.polish[:] if (type(self.polish) is list) else []
 
-			if (arg == None or type(arg) is not (float or int)):
+			if (arg == None):
 				return None
+
+			print('Copy', copy)
 
 			for i, elem in enumerate(copy):
 				if (elem == self.x):
 					copy[i] = str(arg)
+
+			print('Copy2', copy)
 
 			return parser.resolveInfix(copy)
 
 
 	def show(self):
 		if (self.isVal()):
+			if self.val is complex:
+				return print(self.val.real, ' + ', self.val.imag, 'i', sep='')
+
 			return print(str(self.val))
 
 		if (self.isFunc()):
@@ -60,35 +72,60 @@ class Var:
 		return self.type == 3
 
 	def transform(self, expr, ALL):
-		regex = re.compile('([\-\d]\d*[^\d\W]+|\-?\d+\.\d+[^\d\W]+)')
-		regex_koff = re.compile('\-?\d*(\.\d+)?')
-		regex_arg = re.compile('(\-?\d*(\.\d+)?)?' + re.escape(self.x)) if (self.x != None) else ''
-		var_regex = re.compile('[^\d\W]+')
-		expr = expr.replace(' ', '')
-		expr = expr.replace('(', ' ( ').replace(')', ' ) ').replace('^', ' ^ ')
-		expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
-		expr = expr.replace('   ', ' ').replace('  ', ' ').replace('* - ', '* -').replace('+ - ', '+ -')
-		expr = expr.replace('/ - ', '/ -').replace('% - ', '% -').replace('^ - ', '^ -').replace('- - ', '- -')
+		regex = re.compile('(\-?\d*\.?\d*)?([^\d\W]+)(.*)?')
+		regex_n = re.compile('\-?\d+\.?\d*(i|j)?')
+		regex_i = re.compile('(\-?\d+\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
 		varies = regex.findall(expr)
 
-		print(varies)
-
 		for var in varies:
-			var_str = var_regex.match(var).group(0)
+			koff_str = var[0]
+			var_str = var[1]
+			arg_str = var[2].replace('(', '').replace(')', '')
+
 			res = None
 
-			if (var_str not in ALL and not (regex_arg.match(var) and len(regex_arg.match(var)) != len(var))):
+			if (var_str.lower() not in ALL and var_str.lower() != self.x):
 				print('Warning: Undefined variable \'', var_str, '\'. Ignored!', sep='')
-			elif (regex_arg.match(var) and len(regex_arg.match(var).group(0)) != len(var)):
-				koff = '-1' if regex_koff.match(var).group(0) == '-' else regex_koff.match(var).group(0)
-				expr = expr.replace(var, koff + ' * ( ' + self.x + ' ) ' if (koff != '') else self.x)
+			elif (var_str.lower() == self.x and arg_str == ''):
+				koff = '-1' if koff_str == '-' else koff_str
+				expr = expr.replace(koff_str + var_str + var[2], koff + ' * ( ' + self.x + ' ) ' if (koff != '') else self.x)
 			else:
-				if (ALL[var_str].isVal()):
-					res = ALL[var_str].resolve()
-					koff = '-1' if regex_koff.match(var).group(0) == '-' else regex_koff.match(var).group(0)
-					expr = expr.replace(var, koff + ' * ( ' + str(res) + ' ) ' if (koff != '') else str(res))
+				if (var_str.lower() in ALL and ALL[var_str.lower()].isVal()):
+					res = ALL[var_str.lower()].resolve()
+					koff = '-1' if koff_str == '-' else koff_str
+					expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)))
+				elif (var_str.lower() in ALL and ALL[var_str.lower()].isFunc()):
+					if (arg_str == '' and self.isVal()):
+						res = ALL[var_str.lower()]
+						self.type = 1
+						self.x = res.x
+
+						koff = '-1' if koff_str == '-' else koff_str
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + res.val + ' ) ' if (koff != '') else res.val))
+					elif (arg_str == '' and self.isFunc()):
+						res = ALL[var_str.lower()]
+						new_val = res.replace(res.x, self.x)
+
+						koff = '-1' if koff_str == '-' else koff_str
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + new_val + ' ) ' if (koff != '') else new_val))
+					elif (arg_str != ''):
+						res_var = Var()
+						res_var.createVal(arg_str, ALL)
+						res = ALL[var_str.lower()].resolve(res_var.val)
+
+						koff = '-1' if koff_str == '-' else koff_str
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)))
 				else:
-					print('Error: Can\'t include variable', var_str)
+					print('Warning: Can\'t include variable', var_str)
+
+		expr = expr.replace(' ', '')
+		expr = expr.replace('^', ' ^ ')
+		expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
+		expr = expr.replace('   ', ' ').replace('  ', ' ').replace('* - ', '* -').replace('+ - ', '+ -')
+		expr = expr.replace('/ - ', '/ -').replace('% - ', '% -').replace('^ - ', '^ -').replace('- - ', '- -')
+		expr = expr.replace('(', ' ( ').replace(')', ' ) ')
+
+		print('EXPR =', expr)
 
 		return expr

@@ -54,7 +54,7 @@ def infixToPostfix(infixexpr):
     return " ".join(postfixList)
 
 def resolveInfix(exprArr):
-    regexI = re.compile('\-?\d+(\.\d+)?i')
+    regexI = re.compile('\-?\d+(\.\d+)?(i|j)')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
 
@@ -62,27 +62,32 @@ def resolveInfix(exprArr):
         return None
 
     for elem in exprArr:
-        if (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
-            if (elem == '/'):
-                stack[-2] = stack[-2] / stack[-1]
-            elif (elem == '*'):
-                stack[-2] = stack[-2] * stack[-1]
-            elif (elem == '+'):
-                stack[-2] = stack[-2] + stack[-1]
-            elif (elem == '-'):
-                stack[-2] = stack[-2] - stack[-1]
-            elif (elem == '%'):
-                stack[-2] = stack[-2] % stack[-1]
-            elif (elem == '^'):
-                stack[-2] = stack[-2] ** stack[-1]
-            stack.pop()
-        else:
-            if (regex.match(elem)):
-                if (regexI.match(elem)):
-                    stack.append(complex(0, float(regex.match(elem).group(0))))
-                else:
-                    stack.append(float(regex.match(elem).group(0)))
+        try:
+            if (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
+                if (elem == '/'):
+                    stack[-2] = stack[-2] / stack[-1]
+                elif (elem == '*'):
+                    stack[-2] = stack[-2] * stack[-1]
+                elif (elem == '+'):
+                    stack[-2] = stack[-2] + stack[-1]
+                elif (elem == '-'):
+                    stack[-2] = stack[-2] - stack[-1]
+                elif (elem == '%'):
+                    stack[-2] = stack[-2] % stack[-1]
+                elif (elem == '^'):
+                    stack[-2] = stack[-2] ** stack[-1]
+                stack.pop()
             else:
-                print('Warning! Undefined variable or operand \'', elem, '\'. Ignored!', sep='')
+                if (regex.match(elem)):
+                    if (regexI.match(elem)):
+                        stack.append(complex(0, float(regex.match(elem).group(0))))
+                    else:
+                        stack.append(float(regex.match(elem).group(0)))
+                else:
+                    print('Warning! Undefined variable or operand \'', elem, '\'. Ignored!', sep='')
+        except OverflowError:
+            print('Error: Too large result of operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+        except TypeError:
+            print('Error: Can\'t resolve next operation' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
 
     return stack[-1] if (len(stack) > 0) else None

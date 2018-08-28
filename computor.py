@@ -23,13 +23,13 @@ def lets_go(arg):
 			x = regex_arg.search(regex_func.match(arg[0]).group(0)).group(0).replace('(', '').replace(')', '')
 
 			new_var.createFunc(arg[1], x, VARS)
-			VARS[name] = new_var
+			VARS[name.lower()] = new_var
 			new_var.show()
 		elif (regex_word.match(arg[0]) and len(regex_word.match(arg[0]).group(0)) == len(arg[0])):
 			name = regex_word.match(arg[0]).group(0)
 
 			new_var.createVal(arg[1], VARS)
-			VARS[name] = new_var
+			VARS[name.lower()] = new_var
 			new_var.show()
 		else:
 			print('Error: Incorrect variable\'s name!')
