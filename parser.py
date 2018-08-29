@@ -54,7 +54,7 @@ def infixToPostfix(infixexpr):
     return " ".join(postfixList)
 
 def resolveInfix(exprArr):
-    regexI = re.compile('\-?\d+(\.\d+)?(i|j)')
+    regexI = re.compile('\-?\d*(\.\d+)?(i|j)')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
 
@@ -89,5 +89,7 @@ def resolveInfix(exprArr):
             print('Error: Too large result of operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
         except TypeError:
             print('Error: Can\'t resolve next operation' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+        except ZeroDivisionError:
+            print('Error: Division by zero in operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
 
     return stack[-1] if (len(stack) > 0) else None

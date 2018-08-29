@@ -9,11 +9,21 @@ class Var:
 		self.type = -1
 		self.x = None
 
+	def isVal(self):
+		return self.type == 0
+
+	def isFunc(self):
+		return self.type == 1
+
+	def isMatrix(self):
+		return self.type == 2
+
+	def isScalar(self):
+		return self.type == 3
+
 	def createFunc(self, eq, arg, ALL):
 		self.type = 1
 		self.x = arg.lower()
-
-		print('ARG -------> ', self.x)
 
 		self.val = self.transform(eq, ALL)
 		print('TRANSFORM --->', self.val)
@@ -42,6 +52,10 @@ class Var:
 
 			for i, elem in enumerate(copy):
 				if (elem == self.x):
+					if (type(arg) is complex):
+						copy.insert(i, str(arg.imag) + 'i')
+						copy.insert(i, '+')
+						copy[i] = arg.real
 					copy[i] = str(arg)
 
 			print('Copy2', copy)
@@ -51,7 +65,7 @@ class Var:
 
 	def show(self):
 		if (self.isVal()):
-			if self.val is complex:
+			if type(self.val) is complex:
 				return print(self.val.real, ' + ', self.val.imag, 'i', sep='')
 
 			return print(str(self.val))
@@ -59,24 +73,14 @@ class Var:
 		if (self.isFunc()):
 			return print(self.val)
 
-	def isVal(self):
-		return self.type == 0
-
-	def isFunc(self):
-		return self.type == 1
-
-	def isMatrix(self):
-		return self.type == 2
-
-	def isScalar(self):
-		return self.type == 3
-
 	def transform(self, expr, ALL):
-		regex = re.compile('(\-?\d*\.?\d*)?([^\d\W]+)(.*)?')
+		regex = re.compile('(\-?\d*\.?\d*)?([^i\d\W]+)(\(.*\))?')
 		regex_n = re.compile('\-?\d+\.?\d*(i|j)?')
 		regex_i = re.compile('(\-?\d+\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
 		varies = regex.findall(expr)
+
+		print(varies)
 
 		for var in varies:
 			koff_str = var[0]
@@ -85,11 +89,12 @@ class Var:
 
 			res = None
 
-			if (var_str.lower() not in ALL and var_str.lower() != self.x):
+			if (var_str.lower() not in ALL and var_str.lower() != self.x and var_str != 'i' and var_str != 'j'):
 				print('Warning: Undefined variable \'', var_str, '\'. Ignored!', sep='')
+				expr = expr.replace(koff_str + var_str + var[2], '')
 			elif (var_str.lower() == self.x and arg_str == ''):
 				koff = '-1' if koff_str == '-' else koff_str
-				expr = expr.replace(koff_str + var_str + var[2], koff + ' * ( ' + self.x + ' ) ' if (koff != '') else self.x)
+				expr = expr.replace(koff_str + var_str + var[2], (koff + ' * ( ' + self.x + ' ) ') if (koff != '') else self.x)
 			else:
 				if (var_str.lower() in ALL and ALL[var_str.lower()].isVal()):
 					res = ALL[var_str.lower()].resolve()
