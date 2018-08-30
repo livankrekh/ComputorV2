@@ -1,4 +1,5 @@
 import re
+import matrix
 
 class Stack:
     def __init__(self):
@@ -55,6 +56,7 @@ def infixToPostfix(infixexpr):
 
 def resolveInfix(exprArr):
     regexI = re.compile('\-?\d*(\.\d+)?(i|j)')
+    regexM = re.compile('\[.*\]')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
 
@@ -63,7 +65,15 @@ def resolveInfix(exprArr):
 
     for elem in exprArr:
         try:
-            if (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
+            if (len(stack) >= 2 and (type(stack[-2]) is list or type(stack[-1]) is list)):
+                if (elem == '*'):
+                    stack[-2] = stack[-2] * stack[-1]
+                elif (elem == '+'):
+                    stack[-2] = stack[-2] + stack[-1]
+                elif (elem == '-'):
+                    stack[-2] = stack[-2] - stack[-1]
+                stack.pop()
+            elif (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
                 if (elem == '/'):
                     stack[-2] = stack[-2] / stack[-1]
                 elif (elem == '*'):
@@ -81,6 +91,8 @@ def resolveInfix(exprArr):
                 if (regex.match(elem)):
                     if (regexI.match(elem)):
                         stack.append(complex(0, float(regex.match(elem).group(0))))
+                    elif (regexM.match(elem)):
+                        stack.append(matrix.parseMatrix(elem))
                     else:
                         stack.append(float(regex.match(elem).group(0)))
                 else:

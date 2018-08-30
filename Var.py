@@ -18,9 +18,6 @@ class Var:
 	def isMatrix(self):
 		return self.type == 2
 
-	def isScalar(self):
-		return self.type == 3
-
 	def createFunc(self, eq, arg, ALL):
 		self.type = 1
 		self.x = arg.lower()
@@ -38,7 +35,6 @@ class Var:
 		if (self.isVal()):
 			self.val = parser.resolveInfix(self.polish)
 
-
 	def resolve(self, arg=None):
 		if (self.isVal()):
 			return self.val
@@ -48,20 +44,15 @@ class Var:
 			if (arg == None):
 				return None
 
-			print('Copy', copy)
-
-			for i, elem in enumerate(copy):
-				if (elem == self.x):
-					if (type(arg) is complex):
-						copy.insert(i, str(arg.imag) + 'i')
-						copy.insert(i, '+')
-						copy[i] = arg.real
-					copy[i] = str(arg)
-
-			print('Copy2', copy)
+			if (type(arg) is complex):
+				copy = self.val[:].replace(self.x, " ( " + (str(arg.real) + " + " if (arg.real != 0) else '')  + str(arg.imag) + "i ) ")
+				copy = parser.infixToPostfix(copy).split()
+			else:
+				for i, elem in enumerate(copy):
+					if (elem == self.x):
+						copy[i] = str(arg)
 
 			return parser.resolveInfix(copy)
-
 
 	def show(self):
 		if (self.isVal()):
@@ -74,7 +65,7 @@ class Var:
 			return print(self.val)
 
 	def transform(self, expr, ALL):
-		regex = re.compile('(\-?\d*\.?\d*)?([^i\d\W]+)(\(.*\))?')
+		regex = re.compile('(\-?\d*\.?\d*i?)?([^i\d\W]+)(\(.*\))?')
 		regex_n = re.compile('\-?\d+\.?\d*(i|j)?')
 		regex_i = re.compile('(\-?\d+\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
