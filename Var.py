@@ -16,16 +16,14 @@ class Var:
 		return self.type == 1
 
 	def isMatrix(self):
-		return self.type == 2
+		return type(self.val) is list
 
 	def createFunc(self, eq, arg, ALL):
 		self.type = 1
 		self.x = arg.lower()
 
 		self.val = self.transform(eq, ALL)
-		print('TRANSFORM --->', self.val)
 		self.polish = parser.infixToPostfix(self.val).split()
-		print('Postfix --->', self.polish)
 
 	def createVal(self, eq, ALL):
 		self.type = 0
@@ -40,6 +38,9 @@ class Var:
 			return self.val
 		if (self.isFunc()):
 			copy = self.polish[:] if (type(self.polish) is list) else []
+
+			if (type(arg) is list):
+				raise Exception('Error: cannot include matrix or vector as a argument of function')
 
 			if (arg == None):
 				return None
@@ -56,13 +57,17 @@ class Var:
 
 	def show(self):
 		if (self.isVal()):
+			if (self.isMatrix()):
+				for elem in self.val:
+					print('\033[1m\033[32m', elem, '\033[0m', sep='')
+				return
 			if type(self.val) is complex:
-				return print(self.val.real, ' + ', self.val.imag, 'i', sep='')
+				return print('\033[1m\033[32m', self.val.real, ' + ', self.val.imag, 'i', '\033[0m', sep='')
 
-			return print(str(self.val))
+			return print('\033[1m\033[32m', str(self.val), '\033[0m', sep='')
 
 		if (self.isFunc()):
-			return print(self.val)
+			return print('\033[1m\033[32m', self.val, '\033[0m', sep='')
 
 	def transform(self, expr, ALL):
 		regex = re.compile('(\-?\d*\.?\d*i?)?([^i\d\W]+)(\(.*\))?')
@@ -71,26 +76,29 @@ class Var:
 
 		varies = regex.findall(expr)
 
-		print(varies)
-
 		for var in varies:
 			koff_str = var[0]
 			var_str = var[1]
-			arg_str = var[2].replace('(', '').replace(')', '')
+			arg_str = var[2][1:-1]
 
 			res = None
 
 			if (var_str.lower() not in ALL and var_str.lower() != self.x and var_str != 'i' and var_str != 'j'):
 				print('Warning: Undefined variable \'', var_str, '\'. Ignored!', sep='')
-				expr = expr.replace(koff_str + var_str + var[2], '')
+				expr = expr.replace(koff_str + var_str + var[2], '', 1)
 			elif (var_str.lower() == self.x and arg_str == ''):
 				koff = '-1' if koff_str == '-' else koff_str
-				expr = expr.replace(koff_str + var_str + var[2], (koff + ' * ( ' + self.x + ' ) ') if (koff != '') else self.x)
+				expr = expr.replace(koff_str + var_str + var[2], (koff + ' * ( ' + self.x + ' ) ') if (koff != '') else self.x, 1)
 			else:
 				if (var_str.lower() in ALL and ALL[var_str.lower()].isVal()):
 					res = ALL[var_str.lower()].resolve()
 					koff = '-1' if koff_str == '-' else koff_str
-					expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)))
+					if (ALL[var_str.lower()].isMatrix()):
+						res = "["
+						for row in ALL[var_str.lower()].val:
+							res += str(row) + ";"
+						res += "]"
+					expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
 				elif (var_str.lower() in ALL and ALL[var_str.lower()].isFunc()):
 					if (arg_str == '' and self.isVal()):
 						res = ALL[var_str.lower()]
@@ -98,30 +106,25 @@ class Var:
 						self.x = res.x
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + res.val + ' ) ' if (koff != '') else res.val))
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + res.val + ' ) ' if (koff != '') else res.val), 1)
 					elif (arg_str == '' and self.isFunc()):
 						res = ALL[var_str.lower()]
 						new_val = res.replace(res.x, self.x)
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + new_val + ' ) ' if (koff != '') else new_val))
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + new_val + ' ) ' if (koff != '') else new_val), 1)
 					elif (arg_str != ''):
 						res_var = Var()
 						res_var.createVal(arg_str, ALL)
+						if (res_var.isMatrix()):
+							raise Exception('Error: cannot include a matrix as a argument in function \'', var_str, '\'')
 						res = ALL[var_str.lower()].resolve(res_var.val)
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)))
+						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
 				else:
 					print('Warning: Can\'t include variable', var_str)
 
-		expr = expr.replace(' ', '')
-		expr = expr.replace('^', ' ^ ')
-		expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
-		expr = expr.replace('   ', ' ').replace('  ', ' ').replace('* - ', '* -').replace('+ - ', '+ -')
-		expr = expr.replace('/ - ', '/ -').replace('% - ', '% -').replace('^ - ', '^ -').replace('- - ', '- -')
-		expr = expr.replace('(', ' ( ').replace(')', ' ) ')
-
-		print('EXPR =', expr)
+		expr = parser.toNormalForm(expr)
 
 		return expr

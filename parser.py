@@ -20,11 +20,23 @@ class Stack:
     def size(self):
         return len(self.items)
 
+def toNormalForm(expr):
+    expr = expr.replace(' ', '')
+    expr = expr.replace('^', ' ^ ')
+    expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
+    expr = expr.replace('   ', ' ').replace('  ', ' ').replace('* - ', '* -').replace('+ - ', '+ -')
+    expr = expr.replace('/ - ', '/ -').replace('% - ', '% -').replace('^ - ', '^ -').replace('- - ', '- -')
+    expr = expr.replace('(', ' ( ').replace(')', ' ) ')
+
+    return expr
+
 def infixToPostfix(infixexpr):
     regex = re.compile('\-?(\d+(\.\d+)?)?[^\d\W]+|\-?\d+(\.\d+)?')
+    regex_m = re.compile('\[.*\]')
     prec = {}
     prec["^"] = 4
     prec["*"] = 3
+    prec["**"] = 3
     prec["/"] = 3
     prec["%"] = 3
     prec["+"] = 2
@@ -35,7 +47,7 @@ def infixToPostfix(infixexpr):
     tokenList = infixexpr.split()
 
     for token in tokenList:
-        if regex.match(token):
+        if regex.match(token) or regex_m.match(token):
             postfixList.append(token)
         elif token == '(':
             opStack.push(token)
@@ -65,15 +77,17 @@ def resolveInfix(exprArr):
 
     for elem in exprArr:
         try:
-            if (len(stack) >= 2 and (type(stack[-2]) is list or type(stack[-1]) is list)):
-                if (elem == '*'):
-                    stack[-2] = stack[-2] * stack[-1]
+            if (len(stack) >= 2 and (type(stack[-2]) is list or type(stack[-1]) is list) and elem in ['/', '*', '+', '-', '%', '^', '**']):
+                if (elem == '*' or elem == '**'):
+                    stack[-2] = matrix.multMatrix(stack[-2], stack[-1])
                 elif (elem == '+'):
-                    stack[-2] = stack[-2] + stack[-1]
+                    stack[-2] = matrix.addMatrix(stack[-2], stack[-1])
                 elif (elem == '-'):
-                    stack[-2] = stack[-2] - stack[-1]
+                    stack[-2] = matrix.subMatrix(stack[-2], stack[-1])
+                else:
+                    raise Exception('Error: operator \'', elem, '\' cannot use with matrices!')
                 stack.pop()
-            elif (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^']):
+            elif (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^', '**']):
                 if (elem == '/'):
                     stack[-2] = stack[-2] / stack[-1]
                 elif (elem == '*'):
@@ -86,22 +100,26 @@ def resolveInfix(exprArr):
                     stack[-2] = stack[-2] % stack[-1]
                 elif (elem == '^'):
                     stack[-2] = stack[-2] ** stack[-1]
+                elif (elem == '**'):
+                    raise Exception('Error: operator \'**\' cannot use with not matrices!')
                 stack.pop()
             else:
                 if (regex.match(elem)):
                     if (regexI.match(elem)):
                         stack.append(complex(0, float(regex.match(elem).group(0))))
-                    elif (regexM.match(elem)):
-                        stack.append(matrix.parseMatrix(elem))
                     else:
                         stack.append(float(regex.match(elem).group(0)))
+                elif (regexM.match(elem)):
+                        stack.append(matrix.parseMatrix(elem))
                 else:
-                    print('Warning! Undefined variable or operand \'', elem, '\'. Ignored!', sep='')
+                    print('Warning! Redundant operator \'', elem, '\'. Ignored!', sep='')
         except OverflowError:
-            print('Error: Too large result of operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+            raise Exception('Error: Too large result of operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
         except TypeError:
-            print('Error: Can\'t resolve next operation' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+            raise Exception('Error: Can\'t resolve next operation' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
         except ZeroDivisionError:
-            print('Error: Division by zero in operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+            raise Exception('Error: Division by zero in operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
+        except Exception as err:
+            raise Exception(err)
 
     return stack[-1] if (len(stack) > 0) else None
