@@ -20,15 +20,45 @@ class Stack:
     def size(self):
         return len(self.items)
 
-def toNormalForm(expr):
-    expr = expr.replace(' ', '')
-    expr = expr.replace('^', ' ^ ')
-    expr = expr.replace('/', ' / ').replace('*', ' * ').replace('+', ' + ').replace('%', ' % ').replace('-', ' - ')
-    expr = expr.replace('   ', ' ').replace('  ', ' ').replace('* - ', '* -').replace('+ - ', '+ -')
-    expr = expr.replace('/ - ', '/ -').replace('% - ', '% -').replace('^ - ', '^ -').replace('- - ', '- -')
-    expr = expr.replace('(', ' ( ').replace(')', ' ) ')
+def cleanFound(arr):
+    for i, elem in enumerate(arr):
+        if (elem[1] == '' and elem[2] == '' and elem[3] == ''):
+            if (elem[5] != ''):
+                print('Warning: redundant operator \'', elem[5], '\'. Ignored!', sep='')
+            arr[i] = None
 
-    return expr
+    arr = list(filter(None, arr))
+
+    return arr
+
+def toNormalForm(expr):
+    res = str()
+    tmp = expr.replace(' ', '')
+    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]*)(\([^\(\)]*\))?(\))?([\-|\+|\*|\/|\%|\^|\*\*])?')
+
+    tmp = cleanFound(regex.findall(tmp))
+
+    print(tmp)
+
+    for i, elem in enumerate(tmp):
+        if (elem[0] != ''):
+            res += ' ( '
+        if (elem[1] != ''):
+            res += ' ' + elem[1]
+        if (elem[2] != ''):
+            res += elem[2]
+        if (elem[3] != ''):
+            res += elem[3]
+        if (elem[4] != ''):
+            res += ' ' + elem[4] + ' '
+        if (elem[5] != ' ' and i != len(tmp) - 1):
+            res += ' ' + elem[5] + ' '
+
+    res = res.replace('  ', ' ')
+
+    print(res)
+
+    return res
 
 def infixToPostfix(infixexpr):
     regex = re.compile('\-?(\d+(\.\d+)?)?[^\d\W]+|\-?\d+(\.\d+)?')

@@ -74,7 +74,10 @@ class Var:
 		regex_n = re.compile('\-?\d+\.?\d*(i|j)?')
 		regex_i = re.compile('(\-?\d+\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
+		expr = parser.toNormalForm(expr)
 		varies = regex.findall(expr)
+
+		print(varies)
 
 		for var in varies:
 			koff_str = var[0]
@@ -124,7 +127,5 @@ class Var:
 						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
 				else:
 					print('Warning: Can\'t include variable', var_str)
-
-		expr = parser.toNormalForm(expr)
 
 		return expr
