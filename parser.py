@@ -34,7 +34,7 @@ def cleanFound(arr):
 def toNormalForm(expr):
     res = str()
     tmp = expr.replace(' ', '')
-    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?([\-|\+|\*|\/|\%|\^|\*\*])?')
+    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?(\-|\+|\*\*?|\/|\%|\^)?')
 
     tmp = cleanFound(regex.findall(tmp))
 
