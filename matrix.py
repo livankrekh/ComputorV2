@@ -93,7 +93,7 @@ def multMatrix(elem1, elem2):
 
 	return res
 
-def parseMatrix(elem):
+def parseMatrix(elem, ALL):
 	regex_d = re.compile('\-?\d+\.?\d*')
 	regex_m = re.compile('\[.*\]')
 	elem = elem.replace(' ', '')[1:-1]
@@ -109,12 +109,14 @@ def parseMatrix(elem):
 		s = s.split(',')
 
 		for n in s:
-			if (regex_d.match(n)):
+			if (regex_d.match(n) and len(regex_d.match(n).group(0)) == len(n)):
 				include.append(float(regex_d.match(n).group(0)))
 			else:
-				print('Warning: unknown number \'', n, '\', ignored!')
-				include.append(0)
-
+				new_var = Var.Var()
+				new_var.createVal(n, ALL)
+				if (new_var.isFunc()):
+					raise Exception('Error: can\'t include function in a matrix or vector')
+				include.append(new_var.resolve())
 		res.append(include)
 
 	lenMatrix(res)

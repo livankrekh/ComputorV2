@@ -22,16 +22,22 @@ class Var:
 		self.type = 1
 		self.x = arg.lower()
 
+		if (eq.count('(') != eq.count(')')):
+			raise Exception('Error: no open or end bracket!')
+
 		self.val = self.transform(eq, ALL)
 		self.polish = parser.infixToPostfix(self.val).split()
 
 	def createVal(self, eq, ALL):
 		self.type = 0
 
+		if (eq.count('(') != eq.count(')')):
+			raise Exception('Error: no open or end bracket!')
+
 		self.polish = parser.infixToPostfix(self.transform(eq, ALL)).split()
 		
 		if (self.isVal()):
-			self.val = parser.resolveInfix(self.polish)
+			self.val = parser.resolveInfix(self.polish, ALL)
 
 	def resolve(self, arg=None):
 		if (self.isVal()):

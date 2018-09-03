@@ -34,11 +34,9 @@ def cleanFound(arr):
 def toNormalForm(expr):
     res = str()
     tmp = expr.replace(' ', '')
-    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]*)(\([^\(\)]*\))?(\))?([\-|\+|\*|\/|\%|\^|\*\*])?')
+    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?([\-|\+|\*|\/|\%|\^|\*\*])?')
 
     tmp = cleanFound(regex.findall(tmp))
-
-    print(tmp)
 
     for i, elem in enumerate(tmp):
         if (elem[0] != ''):
@@ -55,8 +53,6 @@ def toNormalForm(expr):
             res += ' ' + elem[5] + ' '
 
     res = res.replace('  ', ' ')
-
-    print(res)
 
     return res
 
@@ -96,7 +92,7 @@ def infixToPostfix(infixexpr):
         postfixList.append(opStack.pop())
     return " ".join(postfixList)
 
-def resolveInfix(exprArr):
+def resolveInfix(exprArr, ALL={}):
     regexI = re.compile('\-?\d*(\.\d+)?(i|j)')
     regexM = re.compile('\[.*\]')
     regex = re.compile('\-?\d+(\.\d+)?')
@@ -140,7 +136,7 @@ def resolveInfix(exprArr):
                     else:
                         stack.append(float(regex.match(elem).group(0)))
                 elif (regexM.match(elem)):
-                        stack.append(matrix.parseMatrix(elem))
+                        stack.append(matrix.parseMatrix(elem, ALL))
                 else:
                     print('Warning! Redundant operator \'', elem, '\'. Ignored!', sep='')
         except OverflowError:
