@@ -27,10 +27,12 @@ def lets_go(arg):
 		if ((len(arg) < 2 or new_var2.val == None) and not new_var1.isFunc()):
 			new_var1.show()
 			return
-		func_str = str(new_var1.val) + " = " + str(new_var2.val)
+		func_str = str(new_var1.val) + " = " + (str(new_var2.val) if (new_var2.val != None) else "0")
 		if (new_var2.isFunc()):
 			func_str = func_str.replace(new_var2.x, new_var1.x)
 		func_str = func_str.replace('( ' + str(new_var1.x) + ' )', str(new_var1.x))
+
+		print('\033[1m\033[32m' + func_str + '\033[0m')
 
 		matrix = eq_parser(func_str, 'x' if (new_var1.x == None) else new_var1.x)
 		solve(matrix, str(new_var1.x))

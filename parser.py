@@ -23,10 +23,9 @@ class Stack:
 def cleanFound(arr):
     for i, elem in enumerate(arr):
         if (elem[1] == '' and elem[2] == '' and elem[3] == ''):
-            if (elem[0] != '' or elem[4] != ''):
-                elem[5] = ''
             if (elem[5] != ''):
                 print('Warning: redundant operator \'', elem[5], '\'. Ignored!', sep='')
+            if (elem[0] == '' and elem[4] == ''):
                 arr[i] = None
 
     arr = list(filter(None, arr))
@@ -52,7 +51,8 @@ def toNormalForm(expr):
         if (elem[4] != ''):
             res += ' ' + elem[4] + ' '
         if (elem[5] != ' ' and i < len(tmp) - 1):
-            res += ' ' + elem[5] + ' '
+            if (tmp[i + 1][1] != '' or tmp[i + 1][2] != ''):
+                res += ' ' + elem[5] + ' '
 
     res = res.replace('  ', ' ')
 

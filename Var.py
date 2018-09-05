@@ -53,9 +53,6 @@ class Var:
 		if (self.isFunc()):
 			copy = self.polish[:] if (type(self.polish) is list) else []
 
-			if (type(arg) is list):
-				raise Exception('Error: cannot include matrix or vector as a argument of function')
-
 			if (arg == None):
 				return None
 
@@ -65,7 +62,11 @@ class Var:
 			else:
 				for i, elem in enumerate(copy):
 					if (elem == self.x):
-						copy[i] = str(arg)
+						if (type(arg) is list):
+							print("Matrix - ", parser.matrixToStr(arg))
+							copy[i] = parser.matrixToStr(arg)
+						else:
+							copy[i] = str(arg)
 
 			return parser.resolveInfix(copy)
 
@@ -93,7 +94,7 @@ class Var:
 			return print('\033[1m\033[32m', self.val, '\033[0m', sep='')
 
 	def transform(self, expr, ALL):
-		regex = re.compile('(\-?\d*\.?\d*i?)?([^\d\W]+)(\(.*\))?')
+		regex = re.compile('(\-?\d*\.?\d*i?)?([^\d\W]+)(\(.*?\))?')
 		regex_n = re.compile('\-?\d*\.?\d*(i|j)?')
 		regex_i = re.compile('(\-?\d*\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
@@ -138,12 +139,11 @@ class Var:
 					elif (arg_str != ''):
 						res_var = Var()
 						res_var.createVal(arg_str, ALL)
-						if (res_var.isMatrix()):
-							raise Exception('Error: cannot include a matrix as a argument in function \'' + var_str + '\'')
-
 						res = ALL[var_str.lower()].resolve(res_var.val)
 						if (type(res) is complex):
 							res = "" + str(res.real) + " + " + str(res.imag) + 'i'
+						elif (type(res) is list):
+							res = parser.matrixToStr(res)
 
 						koff = '-1' if koff_str == '-' else koff_str
 						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
