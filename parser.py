@@ -23,9 +23,11 @@ class Stack:
 def cleanFound(arr):
     for i, elem in enumerate(arr):
         if (elem[1] == '' and elem[2] == '' and elem[3] == ''):
+            if (elem[0] != '' or elem[4] != ''):
+                elem[5] = ''
             if (elem[5] != ''):
                 print('Warning: redundant operator \'', elem[5], '\'. Ignored!', sep='')
-            arr[i] = None
+                arr[i] = None
 
     arr = list(filter(None, arr))
 
@@ -34,7 +36,7 @@ def cleanFound(arr):
 def toNormalForm(expr):
     res = str()
     tmp = expr.replace(' ', '')
-    regex = re.compile('(\(?)?(\-?\d+\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?(\-|\+|\*\*?|\/|\%|\^)?')
+    regex = re.compile('(\()?(\-?\d*\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?(\-|\+|\*\*?|\/|\%|\^)?')
 
     tmp = cleanFound(regex.findall(tmp))
 
@@ -49,7 +51,7 @@ def toNormalForm(expr):
             res += elem[3]
         if (elem[4] != ''):
             res += ' ' + elem[4] + ' '
-        if (elem[5] != ' ' and i != len(tmp) - 1):
+        if (elem[5] != ' ' and i < len(tmp) - 1):
             res += ' ' + elem[5] + ' '
 
     res = res.replace('  ', ' ')
@@ -92,8 +94,29 @@ def infixToPostfix(infixexpr):
         postfixList.append(opStack.pop())
     return " ".join(postfixList)
 
+def matrixToStr(matrix):
+    res = "["
+
+    for i, elem in enumerate(matrix):
+        res += "["
+
+        for j, val in enumerate(elem):
+            if (type(val) is complex):
+                res += (str(val.real) if (val.real != 0) else "") \
+                    + ("+" if (val.real != 0 and val.imag != 0) else "") \
+                    + (str(val.imag) + 'i' if (val.imag != 0) else "")
+            else:
+                res += str(val)
+            if (j < len(elem) - 1):
+                res += ','
+        res += '];'
+    
+    res += "]"
+
+    return res
+
 def resolveInfix(exprArr, ALL={}):
-    regexI = re.compile('\-?\d*(\.\d+)?(i|j)')
+    regexI = re.compile('\-?\d*(\.\d+)?(i)')
     regexM = re.compile('\[.*\]')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
@@ -111,7 +134,7 @@ def resolveInfix(exprArr, ALL={}):
                 elif (elem == '-'):
                     stack[-2] = matrix.subMatrix(stack[-2], stack[-1])
                 else:
-                    raise Exception('Error: operator \'', elem, '\' cannot use with matrices!')
+                    raise Exception('Error: operator \'' + elem + '\' cannot use with matrices!')
                 stack.pop()
             elif (len(stack) >= 2 and elem in ['/', '*', '+', '-', '%', '^', '**']):
                 if (elem == '/'):

@@ -1,5 +1,7 @@
 #!/Users/liabanzh/.brew/bin/python3.7
 
+from compv1.polynom_parser import eq_parser, solve
+
 import sys
 import re
 import Var
@@ -10,12 +12,36 @@ VARS = {}
 def lets_go(arg):
 	new_var = Var.Var()
 
-	if (arg.find('=') != -1 and arg.find('?') == -1):
+	if (arg.count('=') > 1):
+		raise Exception('Error: equition should have less than 2 \'=\' sign!')
+
+	if (arg.find('?') != -1):
+		new_var1 = Var.Var()
+		new_var2 = Var.Var()
+		arg = arg.replace('?', '')
+		arg = arg.split('=')
+		func_str = ''
+
+		new_var1.createVal(arg[0], VARS)
+		new_var2.createVal(arg[1] if (len(arg) > 1) else "", VARS)
+		if ((len(arg) < 2 or new_var2.val == None) and not new_var1.isFunc()):
+			new_var1.show()
+			return
+		func_str = str(new_var1.val) + " = " + str(new_var2.val)
+		if (new_var2.isFunc()):
+			func_str = func_str.replace(new_var2.x, new_var1.x)
+		func_str = func_str.replace('( ' + str(new_var1.x) + ' )', str(new_var1.x))
+
+		matrix = eq_parser(func_str, 'x' if (new_var1.x == None) else new_var1.x)
+		solve(matrix, str(new_var1.x))
+
+	elif (arg.find('=') != -1 and arg.find('?') == -1):
 		regex_func = re.compile('[^\d\W]+\([^\d\W]+\)')
 		regex_word = re.compile('[^\d\W]+')
 		regex_arg = re.compile('\([^\d\W]+\)')
 		name = ''
 		x = ''
+		copy = arg[:]
 		arg = arg.split('=')
 		arg[0] = arg[0].replace(' ', '')
 
@@ -23,33 +49,24 @@ def lets_go(arg):
 			name = regex_word.match(arg[0]).group(0)
 			x = regex_arg.search(regex_func.match(arg[0]).group(0)).group(0)[1:-1]
 
-			try:
-				if (name == 'i' or x == 'i'):
-					raise Exception('\033[1m\033[31mError: Incorrect variable name!\033[0m')
-				new_var.createFunc(arg[1], x, VARS)
-				new_var.show()
-				VARS[name.lower()] = new_var
-			except Exception as err:
-				print('\033[1m\033[31m', err, '\033[0m', sep='')
+			if (name == 'i' or x == 'i'):
+				raise Exception('\033[1m\033[31mError: Incorrect variable name!\033[0m')
+			new_var.createFunc(arg[1], x, VARS)
+			new_var.show()
+			VARS[name.lower()] = new_var
 		elif (regex_word.match(arg[0]) and len(regex_word.match(arg[0]).group(0)) == len(arg[0])):
 			name = regex_word.match(arg[0]).group(0)
 
-			try:
-				if (name == 'i'):
-					raise Exception('\033[1m\033[31mError: Incorrect variable\'s name!\033[0m')
-				new_var.createVal(arg[1], VARS)
-				new_var.show()
-				VARS[name.lower()] = new_var
-			except Exception as err:
-				print('\033[1m\033[31m', err, '\033[0m', sep='')
-		else:
-			print('\033[1m\033[31mError: Incorrect variable name!\033[0m')
-	elif (arg.find('=') == -1):
-		try:
-			new_var.createVal(arg, VARS)
+			if (name == 'i'):
+				raise Exception('\033[1m\033[31mError: Incorrect variable\'s name!\033[0m')
+			new_var.createVal(arg[1], VARS)
 			new_var.show()
-		except Exception as err:
-			print('\033[1m\033[31m', err, '\033[0m', sep='')
+			VARS[name.lower()] = new_var
+		else:
+			raise Exception('Error: Incorrect variable name!')
+	elif (arg.find('=') == -1):
+		new_var.createVal(arg, VARS)
+		new_var.show()
 
 if __name__ == "__main__":
 	end = False
@@ -67,4 +84,7 @@ if __name__ == "__main__":
 			end = True
 			break
 
-		lets_go(arg)
+		try:
+			lets_go(arg.lower())
+		except Exception as err:
+			print('\033[1m\033[31m', err, '\033[0m', sep='')

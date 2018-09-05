@@ -19,9 +19,6 @@ def addMatrix(elem1, elem2):
 	matrix = elem1 if (type(elem1) is list) else elem2
 	other = elem2 if (matrix == elem1) else elem1
 
-	print(matrix)
-	print(other)
-
 	if (type(other) is (float or int or complex)):
 		for i in range(len(matrix)):
 			for j in range(len(matrix[i])):
