@@ -3,6 +3,19 @@ from compv1.polynom_parser import eq_parser, solve
 import re
 import Var
 import parser
+import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+
+import matplotlib.pyplot as plt
+
+
+def draw_function(matrix):
+	t = np.arange(-10.0, 10.0, 0.001)
+	s = (matrix[2] * t ** 2) + (matrix[1] * t) + matrix[0]
+
+	plt.plot(t, s)
+	plt.show()
 
 def lets_go(arg, VARS):
 	new_var = Var.Var()
@@ -32,6 +45,8 @@ def lets_go(arg, VARS):
 
 		matrix = eq_parser(func_str, 'x' if (new_var1.x == None) else new_var1.x)
 		solve(matrix, str(new_var1.x))
+
+		draw_function(matrix)
 
 	elif (arg.find('=') != -1 and arg.find('?') == -1):
 		regex_func = re.compile('[^\d\W]+\([^\d\W]+\)')
