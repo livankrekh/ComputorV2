@@ -27,6 +27,8 @@ class Var:
 
 		if (eq.count('(') != eq.count(')')):
 			raise Exception('Error: no open or end bracket!')
+		if (eq.count('[') != eq.count(']')):
+			raise Exception('Error: no open or end square bracket!')
 
 		self.val = self.transform(eq, ALL)
 		self.polish = parser.infixToPostfix(self.val).split()
@@ -37,7 +39,8 @@ class Var:
 
 		if (eq.count('(') != eq.count(')')):
 			raise Exception('Error: no open or end bracket!')
-
+		if (eq.count('[') != eq.count(']')):
+			raise Exception('Error: no open or end square bracket!')
 
 		transformed = self.transform(eq, ALL)
 		self.polish = parser.infixToPostfix(transformed).split()
