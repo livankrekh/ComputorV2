@@ -1,4 +1,4 @@
-#!/Users/liabanzh/.brew/bin/python3.7
+#!/usr/local/bin/python3
 
 from compv1.polynom_parser import eq_parser, solve
 
@@ -24,6 +24,7 @@ def lets_go(arg):
 
 		new_var1.createVal(arg[0], VARS)
 		new_var2.createVal(arg[1] if (len(arg) > 1) else "", VARS)
+
 		if ((len(arg) < 2 or new_var2.val == None) and not new_var1.isFunc()):
 			new_var1.show()
 			return
@@ -62,6 +63,8 @@ def lets_go(arg):
 			if (name == 'i'):
 				raise Exception('\033[1m\033[31mError: Incorrect variable\'s name!\033[0m')
 			new_var.createVal(arg[1], VARS)
+			if (new_var.isFunc()):
+				raise Exception('Error: cannot assign function for variable!')
 			new_var.show()
 			VARS[name.lower()] = new_var
 		else:
@@ -82,7 +85,7 @@ if __name__ == "__main__":
 			print('\n\033[32mBye, bye!\033[0m')
 			exit()
 
-		if (arg.startswith('end') or arg.startswith('exit')):
+		if (arg == 'exit()'):
 			end = True
 			break
 

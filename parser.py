@@ -24,7 +24,7 @@ def cleanFound(arr):
     for i, elem in enumerate(arr):
         if (elem[1] == '' and elem[2] == '' and elem[3] == ''):
             if (elem[5] != ''):
-                print('Warning: redundant operator \'', elem[5], '\'. Ignored!', sep='')
+                print('\033[1mWarning: redundant operator \'', elem[5], '\'. Ignored!\033[0m', sep='')
             if (elem[0] == '' and elem[4] == ''):
                 arr[i] = None
 
@@ -35,7 +35,7 @@ def cleanFound(arr):
 def toNormalForm(expr):
     res = str()
     tmp = expr.replace(' ', '')
-    regex = re.compile('(\()?(\-?\d*\.?\d*)?([^\d\W]+|\[.*\])?(\([^\(\)]*\))?(\))?(\-|\+|\*\*?|\/|\%|\^)?')
+    regex = re.compile('(\()?(\-?\d+\.?\d*)?(\-?[^\d\W]+|\[\[.*?\]\;?\])?(\([^\(\)]*\))?(\))?(\-|\+|\*\*?|\/|\%|\^)?')
 
     tmp = cleanFound(regex.findall(tmp))
 
@@ -60,7 +60,7 @@ def toNormalForm(expr):
 
 def infixToPostfix(infixexpr):
     regex = re.compile('\-?(\d+(\.\d+)?)?[^\d\W]+|\-?\d+(\.\d+)?')
-    regex_m = re.compile('\[.*\]')
+    regex_m = re.compile('\[\[.*?\]\;?\]')
     prec = {}
     prec["^"] = 4
     prec["*"] = 3
@@ -116,8 +116,8 @@ def matrixToStr(matrix):
     return res
 
 def resolveInfix(exprArr, ALL={}):
-    regexI = re.compile('\-?\d*(\.\d+)?(i)')
-    regexM = re.compile('\[.*\]')
+    regexI = re.compile('\-?\d*\.?\d*(i)')
+    regexM = re.compile('\[\[.*?\]\;?\]')
     regex = re.compile('\-?\d+(\.\d+)?')
     stack = []
 
@@ -158,10 +158,12 @@ def resolveInfix(exprArr, ALL={}):
                         stack.append(complex(0, float(regex.match(elem).group(0))))
                     else:
                         stack.append(float(regex.match(elem).group(0)))
+                elif (regexI.match(elem)):
+                    stack.append(complex(0, float(1)))
                 elif (regexM.match(elem)):
-                        stack.append(matrix.parseMatrix(elem, ALL))
+                    stack.append(matrix.parseMatrix(regexM.match(elem).group(0), ALL))
                 else:
-                    print('Warning! Redundant operator \'', elem, '\'. Ignored!', sep='')
+                    print('\033[1mWarning! Redundant operator \'', elem, '\'. Ignored!\033[0m', sep='')
         except OverflowError:
             raise Exception('Error: Too large result of operation ' + str(stack[-2]) + ' ' + elem + ' ' + str(stack[-1]))
         except TypeError:

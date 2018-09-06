@@ -75,7 +75,7 @@ class Var:
 		ret = ""
 
 		if (type(number) is complex):
-			ret += str(self.val.real) + " + " + str(self.val.imag) + "i"
+			ret += str(number.real) + " + " + str(number.imag) + "i"
 
 		return ret
 
@@ -98,7 +98,6 @@ class Var:
 		regex_n = re.compile('\-?\d*\.?\d*(i|j)?')
 		regex_i = re.compile('(\-?\d*\.?\d*)(i)(\+|\-)?(\-?\d+\.?\d*)')
 
-		expr = parser.toNormalForm(expr)
 		varies = regex.findall(expr)
 
 		for var in varies:
@@ -109,11 +108,11 @@ class Var:
 			res = None
 
 			if (var_str.lower() not in ALL and var_str.lower() != self.x and var_str != 'i'):
-				print('Warning: Undefined variable \'', var_str, '\'. Ignored!', sep='')
+				print('\033[1mWarning: Undefined variable \'', var_str, '\'. Ignored!\033[0m', sep='')
 				expr = expr.replace(koff_str + var_str + var[2], '', 1)
 			elif (var_str.lower() == self.x and arg_str == ''):
 				koff = '-1' if koff_str == '-' else koff_str
-				expr = expr.replace(koff_str + var_str + var[2], (koff + ' * ( ' + self.x + ' ) ') if (koff != '') else self.x, 1)
+				expr = expr.replace(koff_str + var_str + var[2], (" " + koff + ' * ( ' + self.x + ' ) ') if (koff != '') else self.x, 1)
 			else:
 				if (var_str.lower() in ALL and ALL[var_str.lower()].isVal()):
 					res = ALL[var_str.lower()].resolve()
@@ -121,34 +120,36 @@ class Var:
 					if (ALL[var_str.lower()].isMatrix()):
 						res = parser.matrixToStr(ALL[var_str.lower()].val)
 					elif (ALL[var_str.lower()].isComplex()):
-						res = Var.include_complex(ALL[var_str.lower()])
-					expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
+						res = " ( " + Var.include_complex(ALL[var_str.lower()].val) + " ) "
+					expr = expr.replace(koff_str + var_str + var[2], " " + koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
 				elif (var_str.lower() in ALL and ALL[var_str.lower()].isFunc()):
 					res = ALL[var_str.lower()]
-					if ((arg_str == '' or arg_str == res.x) and self.isVal()):
+					if ((arg_str == '' or (arg_str == res.x and res.x not in ALL)) and self.isVal()):
 						self.type = 1
 						self.x = res.x
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + res.val + ' ) ' if (koff != '') else res.val), 1)
-					elif ((arg_str == '' or arg_str == res.x) and self.isFunc()):
-						new_val = res.replace(res.x, self.x)
+						expr = expr.replace(koff_str + var_str + var[2], " " +  koff + (' * ( ' + res.val + ' ) ' if (koff != '') else res.val), 1)
+					elif ((arg_str == '' or (arg_str == res.x and res.x not in ALL)) and self.isFunc()):
+						new_val = res.val.replace(res.x, self.x)
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + new_val + ' ) ' if (koff != '') else new_val), 1)
+						expr = expr.replace(koff_str + var_str + var[2], " " + koff + (' * ( ' + new_val + ' ) ' if (koff != '') else new_val), 1)
 					elif (arg_str != ''):
 						res_var = Var()
 						res_var.createVal(arg_str, ALL)
 						res = ALL[var_str.lower()].resolve(res_var.val)
 						if (type(res) is complex):
-							res = "" + str(res.real) + " + " + str(res.imag) + 'i'
+							res = " ( " + str(res.real) + " + " + str(res.imag) + 'i ) '
 						elif (type(res) is list):
 							res = parser.matrixToStr(res)
 
 						koff = '-1' if koff_str == '-' else koff_str
-						expr = expr.replace(koff_str + var_str + var[2], koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
+						expr = expr.replace(koff_str + var_str + var[2], " " + koff + (' * ( ' + str(res) + ' ) ' if (koff != '') else str(res)), 1)
 				else:
 					if (var_str != 'i'):
-						print('Warning: Can\'t include variable', var_str)
+						print('\033[1mWarning: Can\'t include variable', var_str, '\033[0m')
+
+		expr = parser.toNormalForm(expr)
 
 		return expr

@@ -19,7 +19,7 @@ def addMatrix(elem1, elem2):
 	matrix = elem1 if (type(elem1) is list) else elem2
 	other = elem2 if (matrix == elem1) else elem1
 
-	if (type(other) is (float or int or complex)):
+	if (type(other) is float or type(other) is int or type(other) is complex):
 		for i in range(len(matrix)):
 			for j in range(len(matrix[i])):
 				matrix[i][j] += other
@@ -41,7 +41,7 @@ def subMatrix(elem1, elem2):
 	matrix = elem1 if (type(elem1) is list) else elem2
 	other = elem2 if (matrix == elem1) else elem1
 
-	if (type(other) is (float or int or complex)):
+	if (type(other) is float or type(other) is int or type(other) is complex):
 		for i in range(len(matrix)):
 			for j in range(len(matrix[i])):
 				matrix[i][j] -= other
@@ -62,15 +62,14 @@ def subMatrix(elem1, elem2):
 def multMatrix(elem1, elem2):
 	matrix = elem1 if (type(elem1) is list) else elem2
 	other = elem2 if (matrix == elem1) else elem1
+	res = []
 
-	if (type(other) is (float or int or complex)):
+	if (type(other) is float or type(other) is int or type(other) is complex):
 		for i in range(len(matrix)):
 			for j in range(len(matrix[i])):
 				matrix[i][j] *= other
-		res = matrix
-
-	if (type(other) is list):
-		res = []
+		return matrix
+	elif (type(other) is list):
 		m_len = lenMatrix(matrix)
 		o_len = lenMatrix(other)
 
