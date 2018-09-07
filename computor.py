@@ -1,7 +1,8 @@
 #!./venv/bin/python3
 
+from src.var_factory import lets_go
+
 import sys
-import var_factory
 import readline
 
 VARS = {}
@@ -25,6 +26,6 @@ if __name__ == "__main__":
 			break
 
 		try:
-			var_factory.lets_go(arg.lower(), VARS)
+			lets_go(arg.lower(), VARS)
 		except Exception as err:
 			print('\033[1m\033[31m', err, '\033[0m', sep='')
