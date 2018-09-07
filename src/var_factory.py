@@ -18,6 +18,7 @@ def draw_function(matrix):
 		title_str = (str(matrix[i]) + "x^" + str(i) + " + " if (matrix[i] != 0) else "") + title_str
 
 	plt.plot(t, s)
+	plt.grid(True)
 	plt.suptitle(title_str)
 	plt.show()
 
@@ -34,8 +35,14 @@ def draw_matrix(matrix):
 		vector += matrix
 
 	count = np.arange(len(vector))
-	
+	average = [np.mean(vector)] * len(count)
+
 	plt.plot(count, vector)
+	plt.plot(count, average, 'r')
+	plt.grid(True)
+	plt.title('Matrix diagram')
+	plt.xlabel('Numer of element in matrix')
+	plt.ylabel('Value of element')
 	plt.show()
 
 def lets_go(arg, VARS):
@@ -77,6 +84,8 @@ def lets_go(arg, VARS):
 		print('\033[1m\033[32m' + func_str + '\033[0m')
 
 		matrix = eq_parser(func_str, 'x' if (new_var1.x == None) else new_var1.x)
+		if (flag_m):
+			raise Exception("Error: cannot build diagram with function!")
 		if (len(matrix) == 3):
 			solve(matrix, str(new_var1.x))
 			if (flag):
