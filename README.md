@@ -93,3 +93,18 @@ The solution is: x = ( 0 +/- √-1360.0 ) / -40.0
 >> plot func ?
 ```
 ![graph](https://drive.google.com/uc?authuser=0&id=1BdbL9mQ8i15sbaA-xibrKOPE6ihVagdq&export=download)
+
+* Display matrix or vector graph
+```
+>> vector = [[213,341214,12,-12323,23,964,-234,-6765,-4,57,0,657567,-23487,723,8154,-872387,1000000]]
+>> diagram vector ?
+```
+![diagram](https://drive.google.com/uc?authuser=0&id=1selzViWGO5CxRJ3jYh3VWn6dmBFNcKLk&export=download)
+
+## Exit
+
+`Ctrl` + `C`
+OR
+```
+>> exit()
+```
