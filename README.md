@@ -43,4 +43,12 @@ At first, you can create variables of next types:
 >> A ** B
 >> vector = [[1,2,3,4,5,6,7,8,9]]
 ```
-* `Function` : 
+* `Function` : function has form -> `func(x) = a * x^9 + ... + b`; `func` - function name, `x` - argument name
+```
+>> lol(cool) = cool^2 + 21cool + 23
+>> m = [[21,3];[42,21]]
+>> cool(likes) = likes^3 + 20 * m
+likes^3 + 20 * [[21,3];[42,21]]
+```
+## Functionality
+
