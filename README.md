@@ -21,3 +21,10 @@ Create and enter in your own virtualenv
 (venv) > pip3 install -r requirements.txt
 (venv) > python3 computor.py
 ```
+
+## Usage
+
+At first, you can create variables of next types:
+
+* `Real numbers` : every real numbers -> integer, float, results of operations (adding, sub, multiplying, division, power) 
+`>> real = -23.32432`, `>> result = 234*34234 ^ 7 + 23`
