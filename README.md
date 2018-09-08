@@ -41,14 +41,55 @@ At first, you can create variables of next types:
 >> A = [[1,0];[0,1]]
 >> B = [[2,3];[2,3]]
 >> A ** B
+[2.0, 3.0]
+[2.0, 3.0]
 >> vector = [[1,2,3,4,5,6,7,8,9]]
 ```
 * `Function` : function has form -> `func(x) = a * x^9 + ... + b`; `func` - function name, `x` - argument name
 ```
 >> lol(cool) = cool^2 + 21cool + 23
 >> m = [[21,3];[42,21]]
->> cool(likes) = likes^3 + 20 * m
-likes^3 + 20 * [[21,3];[42,21]]
+>> foo(bar) = bar^3 + 20 * m
+bar^3 + 20 * [[21,3];[42,21]]
 ```
 ## Functionality
 
+You can:
+* Get variable as argument in function or include in other equition
+```
+>> bro = 2i
+>> f(y) = y * 23 + 1.12
+>> f(bro) = ?
+1.12 + 46.0i
+>> other(falcon) = falcon^3 + bro
+falcon^3 + 2 * i
+```
+* Get result of equition
+```
+>> 2 + 34.41 - 0.1264^3 * 945 + 723 % 34 * (10 + 4.2*(0.95+31))
+1332.2115840819201
+>> a = 902*(30 + 65.3)
+>> b = 65 - 85^2
+>> a + b
+78800.59999999999
+>> a * b = ?
+-615477895.9999999
+```
+* Resolve of function with degree less than 2
+```
+>> f(x) = -20x^2 + 3
+>> f(x) = ?
+-20 * x ^ 2 + 3 = 0
+Polynomial degree is: 2
+The solution is: x1 =  0.3872983346207417 , x2 =  -0.3872983346207417
+>> f(x) = 20 ?
+-20 * x ^ 2 + 3 = 20.0
+Polynomial degree is: 2
+The solution is: x = ( 0 +/- √-1360.0 ) / -40.0
+```
+* Display function graph
+```
+>> func(x) = -20x^19 + 30x^6 + 12.06x^3 + 18
+>> plot func ?
+```
+![graph](https://drive.google.com/uc?authuser=0&id=1BdbL9mQ8i15sbaA-xibrKOPE6ihVagdq&export=download)
