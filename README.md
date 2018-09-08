@@ -8,6 +8,16 @@ Project is a simple calculator with abilities of add, multiplying, resolving rea
 
 You need have being installed `python3` with `pip3` and `virtualenv`
 
-## Installation
+## Install and run
 
-`> ./install.sh`
+```
+> ./install.sh
+> ./computor.py
+```
+OR
+
+Create and enter in your own virtualenv
+```
+(venv) > pip3 install -r requirements.txt
+(venv) > python3 computor.py
+```
