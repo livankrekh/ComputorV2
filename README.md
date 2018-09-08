@@ -104,6 +104,7 @@ The solution is: x = ( 0 +/- √-1360.0 ) / -40.0
 ## Exit
 
 `Ctrl` + `C`
+
 OR
 ```
 >> exit()
