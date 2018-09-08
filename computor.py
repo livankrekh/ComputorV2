@@ -1,7 +1,6 @@
-#!/usr/local/bin/python3
+#!./venv/bin/python3
 
 try:
-
 	from src.var_factory import lets_go
 
 	import sys
